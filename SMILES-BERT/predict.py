@@ -11,7 +11,9 @@ LABEL='label'
 TEST_PATH="../Datasets/COCONUT_DB_std_smiles_filtered.csv"
 EVAL_PATH="./Datasets/eval.csv"
 TRAIN_PATH="./Datasets/train.csv"
-MODEL_TRAINED="../Models/smiles_bert_classifier"
+# MODEL_TRAINED="../Models/smiles_bert_classifier"
+MODEL_TRAINED="../../SMILES-BERT/smiles_bert_classifier_2"
+
 BATCH_SIZE = 500
 NUM_WORKERS = 8
 MAX_LEN = 58  # Correspond à la taille définit au moment de l'entrainemen du model (Trouver une astuce pour régler le lien)
@@ -74,18 +76,23 @@ def main():
     test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS)
 
     predictions = []
+    proba = []
     for batch in tqdm(test_dataloader, total=len(test_dataset) // BATCH_SIZE):
         batch = {k: v.to(device) for k, v in batch.items()}
         with torch.no_grad():
             logits = model(**batch).logits
+            probabilities = torch.softmax(logits, dim=-1)  # Appliquer softmax aux logits pour obtenir les probabilités
         predictions.extend(torch.argmax(logits, dim=-1).tolist())
+        max_prob, max_idx = torch.max(probabilities, dim=-1)
+        proba.extend(max_prob.tolist())
 
 
     result_df = pd.DataFrame({
         "compound_id": compound_id,
         "SMILES": test_dataset.smiles_list,
         "Predicted_Label": predictions,
-        "True_Label": labels
+        "True_Label": labels,
+        "Proba": proba
     })
 
     result_df.to_csv("./predictions.csv", index=False)
