@@ -32,4 +32,5 @@ To start working on this project, follow these steps:
 
 | Argument          | Description                      |
 |-------------------|----------------------------------|
-| --COCONUT         | "Flag to trigger COCONUT         |
+| --COCONUT         | Flag to trigger COCONUT          |
+| --prediction_path | Path for prediction output       |

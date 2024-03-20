@@ -2,6 +2,7 @@ import pandas as pd
 import torch
 import argparse
 from torch.utils.data import DataLoader, Dataset
+from torch.ao import quantization
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from datasets import load_dataset
 from tqdm import tqdm
@@ -12,20 +13,13 @@ class SMILESDataset(Dataset):
     """
     Un Dataset personnalisé pour la prédiction des SMILES.
     """
-    def __init__(self, smiles_list, tokenizer, max_len):
-        """
-        Initialise le dataset.
-        
-        :param smiles_list: Une liste de chaînes SMILES.
-        :param tokenizer: Un tokenizeur pré-entraîné.
-        :param max_len: La longueur maximale des séquences tokenisées.
-        """
+    def __init__(self, smiles_list, tokenizer, max_len, cache = None):
         self.smiles_list = smiles_list
         self.tokenizer = tokenizer
         self.max_len = max_len
+        self.cache = cache or {} # Permet de garder en cache les tokens
 
     def __len__(self):
-        """Retourne la taille du dataset."""
         return len(self.smiles_list)
 
     def __getitem__(self, idx : int):
@@ -36,6 +30,8 @@ class SMILESDataset(Dataset):
         :return: Un dictionnaire de tenseurs correspondant à l'entrée tokenisée.
         """
         smile = self.smiles_list[idx]
+        if smile in self.cache:
+            return self.cache[smile]
         inputs = self.tokenizer(
             smile,
             padding="max_length",
@@ -44,13 +40,26 @@ class SMILESDataset(Dataset):
             return_tensors="pt"
         )
         inputs = {key: value.squeeze(0) for key, value in inputs.items()}
+        self.cache[smile] = inputs
         return inputs
+
+
+def load_model_and_tokenizer():
+    tokenizer = AutoTokenizer.from_pretrained(BertConfig.model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(BertConfig.model_trained)
+    model = quantization.quantize_dynamic(model, dtype=torch.qint8) # Quantization dynamic
+    return tokenizer, model
+
 
 def main(args : argparse.Namespace):
 
+    tokenizer, model = load_model_and_tokenizer()
+
+    if torch.cuda.device_count() > 1:
+        print(f"Using {torch.cuda.device_count()} GPUs!")
+        model = torch.nn.DataParallel(model)
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tokenizer = AutoTokenizer.from_pretrained("JuIm/SMILES_BERT")
-    model = AutoModelForSequenceClassification.from_pretrained(BertConfig.model_trained)
     model.to(device)
 
     if args.COCONUT:
@@ -80,10 +89,10 @@ def main(args : argparse.Namespace):
         with torch.no_grad():
             logits = model(**batch).logits
             probabilities = torch.softmax(logits, dim=-1)  # Appliquer softmax aux logits pour obtenir les probabilités
-        predictions.extend(torch.argmax(logits, dim=-1).tolist())
-        max_prob, max_idx = torch.max(probabilities, dim=-1)
-        proba.extend(max_prob.tolist())
-
+            predicted_labels = torch.argmax(logits, dim=-1)
+            predicted_proba = probabilities[range(len(predicted_labels)), predicted_labels]
+        predictions.extend(predicted_labels.tolist())
+        proba.extend(predicted_proba.tolist())
 
     result_df = pd.DataFrame({
         "compound_id": compound_id,
@@ -93,14 +102,17 @@ def main(args : argparse.Namespace):
         "Proba": proba
     })
 
-    result_df.to_csv("./predictions.csv", index=False)
+    result_df.to_csv(args.prediction_path, index=False)
     
-    print("Les prédictions ont été sauvegardées dans './predictions.csv'.")
+    print(f"Les prédictions ont été sauvegardées dans {args.prediction_path}.")
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Meta Parameters')
     parser.add_argument('--COCONUT', action='store_true', help="Flag to trigger COCONUT.")
+    parser.add_argument('--prediction_path', type=str,
+                        default="./predictions.csv",
+                        help="Path for prediction output")
     args = parser.parse_args()
 
     main(args)
