@@ -1,22 +1,29 @@
+from sklearn.metrics import (
+    accuracy_score,
+    roc_auc_score,
+    precision_score,
+    recall_score,
+    f1_score
+)
+from transformers import (
+    AutoTokenizer,
+    AutoModelForSequenceClassification,
+    DataCollatorWithPadding,
+    Trainer,
+    TrainingArguments,
+    TrainerCallback
+)
+from datasets import load_dataset
+from config_bert import BertConfig
 import numpy as np
 import csv
-from sklearn.metrics import accuracy_score, roc_auc_score, precision_score, recall_score, f1_score
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, DataCollatorWithPadding, Trainer, TrainingArguments, TrainerCallback
-from datasets import load_dataset
-
-SMILES='smiles'
-LABEL='label'
-TEST_PATH="./Datasets/test.csv"
-EVAL_PATH="./Datasets/eval.csv"
-TRAIN_PATH="./Datasets/train.csv"
-OUTPUT_PATH="../Models/smiles_bert_classifier"
 
 
 class SMILESTokenization:
     """
     Classe pour la tokenization et la préparation des datasets SMILES.
     """
-    def __init__(self, model_name="JuIm/SMILES_BERT", max_len=None):
+    def __init__(self, model_name:str = "JuIm/SMILES_BERT", max_len:int = 512):
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.max_len = max_len
 
@@ -25,18 +32,14 @@ class SMILESTokenization:
 
     def load_and_prepare_datasets(self, dataset_paths):
         datasets = {split: load_dataset("csv", data_files=path, split='train') for split, path in dataset_paths.items()}
-        
-        if self.max_len is None:
-            self.max_len = max(max(len(self.tokenizer.encode(smiles)) for dataset in datasets.values() for smiles in dataset[SMILES]), 512)  # Setting a reasonable default max_len
-        
-        tokenized_datasets = {split: dataset.map(lambda examples: self.tokenize(examples[SMILES]), batched=True) for split, dataset in datasets.items()}
+        tokenized_datasets = {split: dataset.map(lambda examples: self.tokenize(examples[BertConfig.smiles_column]), batched=True) for split, dataset in datasets.items()}
         return tokenized_datasets
 
 class TrainingModule:
     """
     Module pour l'entraînement, la validation et le test du modèle, incluant l'enregistrement des métriques.
     """
-    def __init__(self, model_name="JuIm/SMILES_BERT", dataset_paths=None):
+    def __init__(self, model_name:str = "JuIm/SMILES_BERT", dataset_paths:str = None):
         self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
         self.data_collator = DataCollatorWithPadding(tokenizer=SMILESTokenization(model_name).tokenizer)
         self.dataset_paths = dataset_paths or {}
@@ -70,7 +73,7 @@ class TrainingModule:
             callbacks=[MetricsLoggerCallback()]
         )
         trainer.train()
-        self.model.save_pretrained(OUTPUT_PATH)
+        self.model.save_pretrained(BertConfig.coconut_path)
 
 class MetricsLoggerCallback(TrainerCallback):
     """
@@ -91,13 +94,16 @@ class MetricsLoggerCallback(TrainerCallback):
 
 
 def main():
-    dataset_paths = {"train": TRAIN_PATH, "eval": EVAL_PATH, "test": TEST_PATH}
+    dataset_paths = {"train": BertConfig.train_path,
+                     "eval": BertConfig.eval_path,
+                     "test": BertConfig.test_path}
 
-    tokenization = SMILESTokenization()
+    tokenization = SMILESTokenization(model_name=BertConfig.model_name,
+                                      max_len=BertConfig.max_len)
     tokenized_datasets = tokenization.load_and_prepare_datasets(dataset_paths)
 
     training_args = TrainingArguments(
-        output_dir=OUTPUT_PATH,
+        output_dir=BertConfig.output_path,
         overwrite_output_dir=True,
         num_train_epochs=3,
         per_device_train_batch_size=4,

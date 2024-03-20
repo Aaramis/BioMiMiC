@@ -7,6 +7,7 @@ from datasets import load_dataset
 from tqdm import tqdm
 from config_bert import BertConfig 
 
+
 class SMILESDataset(Dataset):
     """
     Un Dataset personnalisé pour la prédiction des SMILES.
@@ -51,9 +52,6 @@ def main(args : argparse.Namespace):
     tokenizer = AutoTokenizer.from_pretrained("JuIm/SMILES_BERT")
     model = AutoModelForSequenceClassification.from_pretrained(BertConfig.model_trained)
     model.to(device)
-
-    # datasets = {split: load_dataset("csv", data_files=path, split ='train') for split, path in dataset_paths.items()}
-    # max_len = max(len(tokenizer.encode(smile)) for dataset in datasets.values() for smile in dataset[SMILES])
 
     if args.COCONUT:
         print(f"Screening COCONUT database with {BertConfig.coconut_path} file")
@@ -100,8 +98,8 @@ def main(args : argparse.Namespace):
     print("Les prédictions ont été sauvegardées dans './predictions.csv'.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Meta Parameters')
 
+    parser = argparse.ArgumentParser(description='Meta Parameters')
     parser.add_argument('--COCONUT', action='store_true', help="Flag to trigger COCONUT.")
     args = parser.parse_args()
 
