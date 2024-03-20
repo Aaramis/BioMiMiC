@@ -9,3 +9,27 @@ Puis y a 2 fichiers pythons :
 
 Pour le moment les fichiers sont pas du tout propre, pas optimisé et pas maxi-robuste face à des modifications (genre beaucoup de variables codées en dur).
 Mais je reviendrai dessus une fois le test de screening finit et le dossier du projet complété.
+
+## I. Introduction
+
+## II. Getting Start
+
+To start working on this project, follow these steps:
+
+### Create environment
+
+* Clone the repository: ```git clone git@github.com:Aaramis/BioMiMiC.git```
+* Create a virtual environment: ```conda env create --file environment.yml```
+* Activate the virtual environment: ``` conda activate hugging_face ``` 
+
+### Update environment
+
+* Using conda: ```conda env export > environment.yml```
+
+## III. Optional Arguments
+
+### [Predict File :](./SMILES-BERT/predict.py)
+
+| Argument          | Description                      |
+|-------------------|----------------------------------|
+| --COCONUT         | "Flag to trigger COCONUT         |
