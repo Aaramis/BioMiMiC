@@ -73,7 +73,7 @@ class TrainingModule:
             callbacks=[MetricsLoggerCallback()]
         )
         trainer.train()
-        self.model.save_pretrained(BertConfig.coconut_path)
+        self.model.save_pretrained(BertConfig.coconut_f_path)
 
 class MetricsLoggerCallback(TrainerCallback):
     """
