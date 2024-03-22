@@ -79,7 +79,7 @@ class MetricsLoggerCallback(TrainerCallback):
     """
     Callback pour enregistrer les métriques de formation dans un fichier CSV après chaque évaluation.
     """
-    def __init__(self, csv_file="training_metrics.csv"):
+    def __init__(self, csv_file=BertConfig.metrics_path):
         self.csv_file = csv_file
 
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):

@@ -10,6 +10,7 @@ class BertConfig:
     eval_path: str = "./Datasets/eval.csv"
     train_path: str = "./Datasets/train.csv"
     test_path: str = "./Datasets/train.csv"
+    metrics_path: str = "./training_metrics.csv"
     coconut_path: str = "../Datasets/COCONUT_DB_std_smiles.csv"
     coconut_f_path: str = "../Datasets/COCONUT_DB_std_smiles_filtered.csv"
     output_path: str = "../Models/smiles_bert_classifier_2"
