@@ -5,12 +5,8 @@
 import random
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import requests
 import json
-from rdkit import Chem
-from rdkit.Chem.Draw import MolsToGridImage
 import time
 from urllib.parse import quote
 from indigo import *
