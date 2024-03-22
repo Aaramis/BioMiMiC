@@ -1,7 +1,5 @@
 # https://projects.volkamerlab.org/teachopencadd/talktorials/T013_query_pubchem.html
 
-# Syntax : python dataset_generator.py compound_of_interest
-
 import random
 import pandas as pd
 import numpy as np
@@ -207,19 +205,23 @@ for name in names:
 cids = [item for item in pubchem_cids if item is not None]
 pubchem_smiles = smiles_from_pubchem_cids(cids)
 pubchem_names = names_from_pubchem_cids(cids)
-results_df = pd.DataFrame({"cid": cids, "name": pubchem_names, "smiles": pubchem_smiles})
-results_df = results_df.drop_duplicates(subset=["smiles"])
-positive_df = results_df
+positive_df = pd.DataFrame({"cid": cids, "name": pubchem_names, "smiles": pubchem_smiles})
+positive_df = positive_df.drop_duplicates(subset=["smiles"])
+positive_df["std_smiles"] = recompute_smiles(positive_df["smiles"].to_list())
 positive_df["compound_of_interest"] = True
+positive_df["len_smiles"] = positive_df["std_smiles"].str.len()
+positive_df = positive_df.drop(columns=["smiles"])
 n_positives = positive_df.shape[0]
-random_db = pd.read_csv("PubChem_compound_text_drug.csv", low_memory=False)
-random_db = random_db[["cid", "cmpdname", "canonicalsmiles"]]
+random_db = pd.read_csv("random_db.csv", low_memory=False)
+random_db = random_db.drop(columns=["Unnamed: 0"])
+random_db.columns = ["cid", "name", "std_smiles", "len_smiles"]
+len_smiles_boundaries = [positive_df["len_smiles"].mean()-positive_df["len_smiles"].std(),
+                         positive_df["len_smiles"].mean()+positive_df["len_smiles"].std()]
+random_db = random_db[(random_db["len_smiles"] > len_smiles_boundaries[0]) & \
+                      (random_db["len_smiles"] < len_smiles_boundaries[1])]
 random_df = random_db.sample(n_positives*9)
 random_df["compound_of_interest"] = False
-random_df.columns = ["cid", "name", "smiles", "compound_of_interest"]
 final_df = pd.concat([positive_df, random_df])
-final_df["std_smiles"] = recompute_smiles(final_df["smiles"].to_list())
-final_df = final_df.drop(columns=["smiles"])
 final_df = final_df.reset_index(drop=True)
 final_df.to_csv(output_file_name)
 print("Dataset generation finished !")
