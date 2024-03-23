@@ -36,7 +36,7 @@ st.header("Step 1: Fine-tune a Predictive Model")
 st.write("Enter a molecular function and click the button to start fine-tuning.")
 
 # User input for molecular function
-molecules = ["Gefitinib", 'Ibuprofen', 'Tenofovir', 'Fluoxetine', 'Diazepam']
+molecules = ["Gefitinib", 'Ibuprofen', 'Tenofovir', 'Fluoxetine', 'Diazepam', 'Risperidone', 'Tramadol', 'Prednisolone']
 # mol_function = st.text_input("Molecular Function")
 chosen_molecule = st.selectbox("Molecule", molecules)
 if chosen_molecule == "Gefitinib":
@@ -64,6 +64,23 @@ elif chosen_molecule == "Diazepam":
              "muscle spasms, and seizures. It works by enhancing the activity of gamma-aminobutyric acid (GABA), " + \
              "a neurotransmitter that inhibits brain activity, resulting in a calming effect. Diazepam is also " + \
              "used before surgical procedures or medical procedures to induce relaxation and drowsiness.")
+elif chosen_molecule == "Risperidone":
+    st.write("Risperidone is an antipsychotic medication used to treat schizophrenia, bipolar disorder, and " + \
+             "irritability associated with autism. It belongs to a class of drugs known as atypical " + \
+             "antipsychotics, which work by blocking the action of certain neurotransmitters in the brain, " + \
+             "particularly dopamine and serotonin. Risperidone helps to alleviate symptoms such as hallucinations, " + \
+             "delusions, and disorganized thinking in psychotic disorders.")
+elif chosen_molecule == "Tramadol":
+    st.write("Tramadol is a pain reliever medication used to alleviate moderate to severe pain. It works by " + \
+             "binding to opioid receptors in the brain to block the transmission of pain signals. Additionally, it " + \
+             "increases the release of serotonin and norepinephrine, which also contribute to its pain-relieving " + \
+             "effect. Tramadol is often prescribed for conditions such as chronic pain, post-operative pain, and " + \
+             "pain related to injuries.")
+elif chosen_molecule == "Prednisolone":
+    st.write("Prednisolone is a synthetic corticosteroid used to treat a variety of inflammatory and allergic " + \
+             "conditions. It works by suppressing the immune system and reducing inflammation in the body. " + \
+             "Prednisolone is prescribed to treat conditions such as asthma, allergic reactions, arthritis, " + \
+             "autoimmune diseases, and some dermatological conditions.")
 
 
 
