@@ -8,4 +8,11 @@ class TodoItem(models.Model):
 
 
 class Biomimic(models.Model):
+    molecule_choice = [
+        ("Antioxydant", 'Antioxydant'),
+        ('Antibiotique', 'Antibiotique'),
+        ('Antifongique', 'Antifongique'),
+        ('Analgésique', 'Analgésique')
+    ]
     Biomimic_image = models.ImageField(null=True, blank=True, upload_to="images/")
+    molecule_fct = models.CharField(choices=molecule_choice, max_length=50, blank=True, null=True)
