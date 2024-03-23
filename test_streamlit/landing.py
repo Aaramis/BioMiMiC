@@ -36,7 +36,7 @@ st.header("Step 1: Fine-tune a Predictive Model")
 st.write("Enter a molecular function and click the button to start fine-tuning.")
 
 # User input for molecular function
-molecules = ["Gefitinib", 'Ibuprofen', 'Tenofovir']
+molecules = ["Gefitinib", 'Ibuprofen', 'Tenofovir', 'Fluoxetine', 'Diazepam']
 # mol_function = st.text_input("Molecular Function")
 chosen_molecule = st.selectbox("Molecule", molecules)
 if chosen_molecule == "Gefitinib":
@@ -53,13 +53,25 @@ elif chosen_molecule == "Tenofovir":
     st.write("Tenofovir is an antiviral medication used to treat HIV infection and chronic hepatitis B. It belongs " + \
              "to a class of drugs called nucleotide reverse transcriptase inhibitors (NRTIs), which work by " + \
              "blocking the activity of an enzyme called reverse transcriptase, essential for the replication of the virus.")
+elif chosen_molecule == "Fluoxetine":
+    st.write("Fluoxetine is an antidepressant medication belonging to the class of selective serotonin reuptake " + \
+             "inhibitors (SSRIs). It is primarily used to treat major depression, obsessive-compulsive disorder " + \
+             "(OCD), eating disorders such as bulimia nervosa, and premenstrual dysphoric disorder (PMDD). " + \
+             "Fluoxetine works by increasing serotonin levels in the brain, which improves depressive symptoms and " + \
+             "reduces obsessive and compulsive thoughts.")
+elif chosen_molecule == "Diazepam":
+    st.write("Diazepam is a medication classified as a benzodiazepine, commonly used to treat anxiety disorders, " + \
+             "muscle spasms, and seizures. It works by enhancing the activity of gamma-aminobutyric acid (GABA), " + \
+             "a neurotransmitter that inhibits brain activity, resulting in a calming effect. Diazepam is also " + \
+             "used before surgical procedures or medical procedures to induce relaxation and drowsiness.")
 
 
 
 if st.button("Fine-tune Model"):
     st.write(f"Generating training dataset for {chosen_molecule}...")
     result = subprocess.run(["python", "../dataset_generator/dataset_generator.py", "-c", chosen_molecule.lower(),
-                             "--random_path", "../dataset_generator/random_db.csv"])
+                             "--random_path", "../dataset_generator/random_db.csv",
+                             "--output_path", f"../dataset_generator/{chosen_molecule.lower()}_dataset.csv"])
     if result.returncode == 0:
         st.success("Dataset sucessfully generated!")
     else:

@@ -183,21 +183,22 @@ def recompute_smiles(compound_list):
     return new_smiles
 
 
-
 parser = argparse.ArgumentParser(description='Generate datasets fromd drug name')
 parser.add_argument('-c', "--compound", type=str, help="Name of compound of interest", default=None)
-parser.add_argument("--random_path", type=str, help="Random database path from current working directory", default=None)
+parser.add_argument("--random_path", type=str, help="Random database path", default=None)
+parser.add_argument("--output_path", type=str, help="Output file path", default=None)
 parser.add_argument("--ratio", type=str, help="Positive / random ratio of dataset, default value is 9", default=9)
 
 args = parser.parse_args()
 
 if not args.compound:
-    raise ValueError("Please enter a compound name")
+    raise SyntaxError("Please enter a compound name")
 if not args.random_path:
-    raise ValueError("Please provide path of random database")
+    raise SyntaxError("Please provide path of random database")
+if not args.output_path:
+    raise SyntaxError("Please provide output file path")
 
 compound = args.compound
-output_file_name = args.compound + "_dataset.csv"
 
 print("Generating dataset...")
 chembl_id = get_chembl_id(compound)
@@ -228,5 +229,5 @@ random_df = random_db.sample(n_positives*int(args.ratio))
 random_df["compound_of_interest"] = False
 final_df = pd.concat([positive_df, random_df])
 final_df = final_df.reset_index(drop=True)
-final_df.to_csv(output_file_name)
+final_df.to_csv(args.output_path)
 print("Dataset generation finished !")
