@@ -162,6 +162,5 @@ lightning_logs
 
 
 .idea/*
-dataset_generator/*.csv
 Models*
 SMILES-BERT/predictions.csv

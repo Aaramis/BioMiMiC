@@ -186,6 +186,7 @@ def recompute_smiles(compound_list):
 
 parser = argparse.ArgumentParser(description='Generate datasets fromd drug name')
 parser.add_argument('-c', "--compound", type=str, help="Name of compound of interest", default=None)
+parser.add_argument('-r', "--ratio", type=str, help="Positive / random ratio of dataset, default value is 9", default="9")
 args = parser.parse_args()
 
 if not args.compound:
@@ -219,7 +220,7 @@ len_smiles_boundaries = [positive_df["len_smiles"].mean()-positive_df["len_smile
                          positive_df["len_smiles"].mean()+positive_df["len_smiles"].std()]
 random_db = random_db[(random_db["len_smiles"] > len_smiles_boundaries[0]) & \
                       (random_db["len_smiles"] < len_smiles_boundaries[1])]
-random_df = random_db.sample(n_positives*9)
+random_df = random_db.sample(n_positives*int(args.ratio))
 random_df["compound_of_interest"] = False
 final_df = pd.concat([positive_df, random_df])
 final_df = final_df.reset_index(drop=True)
