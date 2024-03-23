@@ -36,13 +36,36 @@ st.header("Step 1: Fine-tune a Predictive Model")
 st.write("Enter a molecular function and click the button to start fine-tuning.")
 
 # User input for molecular function
-molecules_functions = ["Antioxydant", 'Antibiotique', 'Antifongique', 'Analgésique']
+molecules = ["Gefitinib", 'Ibuprofen', 'Tenofovir']
 # mol_function = st.text_input("Molecular Function")
-mol_function = st.selectbox("Molecular Function", molecules_functions)
+chosen_molecule = st.selectbox("Molecule", molecules)
+if chosen_molecule == "Gefitinib":
+    st.write("Gefitinib is a medication belonging to the class of tyrosine kinase inhibitors. It is primarily used " + \
+             "in the treatment of cancer, particularly non-small cell lung cancer (NSCLC). Gefitinib works by " + \
+             "blocking the activity of certain tyrosine kinase proteins involved in the growth and spread of " + \
+             "cancer cells, especially the epidermal growth factor receptor (EGFR).")
+elif chosen_molecule == "Ibuprofen":
+    st.write("Ibuprofen is a nonsteroidal anti-inflammatory drug (NSAID) commonly used to relieve pain, reduce " + \
+             "inflammation, and lower fever. It works by inhibiting the production of prostaglandins, which are " + \
+             "chemicals in the body that cause inflammation, pain, and fever. Ibuprofen is used to treat various " + \
+             "conditions such as headache, toothache, menstrual cramps, muscle aches, arthritis, and minor injuries.")
+elif chosen_molecule == "Tenofovir":
+    st.write("Tenofovir is an antiviral medication used to treat HIV infection and chronic hepatitis B. It belongs " + \
+             "to a class of drugs called nucleotide reverse transcriptase inhibitors (NRTIs), which work by " + \
+             "blocking the activity of an enzyme called reverse transcriptase, essential for the replication of the virus.")
+
 
 
 if st.button("Fine-tune Model"):
-    st.write(f"Fine-tuning model for '{mol_function}' function...")
+    st.write(f"Generating training dataset for {chosen_molecule}...")
+    result = subprocess.run(["python", "../dataset_generator/dataset_generator.py", "-c", chosen_molecule.lower(),
+                             "--random_path", "../dataset_generator/random_db.csv"])
+    if result.returncode == 0:
+        st.success("Dataset sucessfully generated!")
+    else:
+        st.error("Error occured during dataset generation.")
+    st.write(f"Fine-tuning model for '{chosen_molecule}' function...")
+
     # Perform fine-tuning process here
     st.success("Model fine-tuning completed!")
 

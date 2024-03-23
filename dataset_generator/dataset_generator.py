@@ -186,11 +186,15 @@ def recompute_smiles(compound_list):
 
 parser = argparse.ArgumentParser(description='Generate datasets fromd drug name')
 parser.add_argument('-c', "--compound", type=str, help="Name of compound of interest", default=None)
-parser.add_argument('-r', "--ratio", type=str, help="Positive / random ratio of dataset, default value is 9", default="9")
+parser.add_argument("--random_path", type=str, help="Random database path from current working directory", default=None)
+parser.add_argument("--ratio", type=str, help="Positive / random ratio of dataset, default value is 9", default=9)
+
 args = parser.parse_args()
 
 if not args.compound:
     raise ValueError("Please enter a compound name")
+if not args.random_path:
+    raise ValueError("Please provide path of random database")
 
 compound = args.compound
 output_file_name = args.compound + "_dataset.csv"
@@ -213,7 +217,7 @@ positive_df["compound_of_interest"] = True
 positive_df["len_smiles"] = positive_df["std_smiles"].str.len()
 positive_df = positive_df.drop(columns=["smiles"])
 n_positives = positive_df.shape[0]
-random_db = pd.read_csv("random_db.csv", low_memory=False)
+random_db = pd.read_csv(args.random_path, low_memory=False)
 random_db = random_db.drop(columns=["Unnamed: 0"])
 random_db.columns = ["cid", "name", "std_smiles", "len_smiles"]
 len_smiles_boundaries = [positive_df["len_smiles"].mean()-positive_df["len_smiles"].std(),
